@@ -1,14 +1,17 @@
+# Use Nginx to serve static files
+FROM nginx:alpine
 
-FROM node:14-alpine3.12
+# Remove default nginx static assets
+RUN rm -rf /usr/share/nginx/html/*
 
-WORKDIR /app
+# Copy all static files to the nginx html directory
+COPY . /usr/share/nginx/html/
 
-COPY package*.json ./
-
-RUN npm install
-
-COPY . .
-
+# Expose port 4000 for serving
 EXPOSE 4000
 
-CMD ["node", "index.js"]
+# Replace default config to use port 4000
+RUN sed -i 's/80;/4000;/g' /etc/nginx/conf.d/default.conf
+
+# Start Nginx server
+CMD ["nginx", "-g", "daemon off;"]
