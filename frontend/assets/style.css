@@ -1,0 +1,18 @@
+body {
+  font-family: 'Poppins', sans-serif;
+}
+#toast {
+  transition: opacity 0.3s;
+}
+@media (max-width: 600px) {
+  main {
+    padding: 0.5rem !important;
+  }
+  nav ul {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .max-w-4xl {
+    max-width: 100vw !important;
+  }
+}

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PassX - Your Personal Password Manager</title>
+  <link rel="stylesheet" href="assets/style.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+    };
+  </script>
+</head>
+
+<body class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100">
+  <nav class="bg-black text-white py-4 px-6 flex justify-between items-center shadow-md">
+    <div class="text-2xl font-extrabold cursor-pointer">PassX</div>
+    <ul class="flex gap-6">
+      <li id="navHome" class="hover:text-gray-300 cursor-pointer">Home</li>
+      <li id="navAdd" class="hover:text-gray-300 cursor-pointer">Add Password</li>
+      <li id="navAbout" class="hover:text-gray-300 cursor-pointer">About</li>
+      <li id="navContact" class="hover:text-gray-300 cursor-pointer">Contact</li>
+      <li>
+        <button id="toggleDark" class="bg-gray-700 px-3 py-1 rounded text-sm">Toggle Dark Mode</button>
+      </li>
+    </ul>
+  </nav>
+
+  <main class="max-w-4xl mx-auto mt-10 p-4 bg-white rounded-xl shadow-lg dark:bg-gray-800">
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-5 right-5 z-50 hidden bg-green-600 text-white px-4 py-2 rounded shadow"></div>
+
+    <!-- Home Page -->
+    <section id="pageHome">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2">
+        <h1 class="text-3xl font-bold">Password Manager</h1>
+        <div class="flex gap-2">
+          <input id="search" type="text" placeholder="Search..." class="p-2 border rounded w-48" />
+          <button id="exportBtn" class="bg-blue-600 text-white px-3 py-1 rounded">Export</button>
+          <label class="bg-blue-600 text-white px-3 py-1 rounded cursor-pointer">
+            Import
+            <input id="importInput" type="file" accept=".json" class="hidden" />
+          </label>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full border border-gray-300 dark:border-gray-600 text-sm text-left">
+          <thead class="bg-gray-200 dark:bg-gray-700">
+            <tr>
+              <th class="p-3 border">Website</th>
+              <th class="p-3 border">Username</th>
+              <th class="p-3 border">Password</th>
+              <th class="p-3 border">Edit</th>
+              <th class="p-3 border">Delete</th>
+            </tr>
+          </thead>
+          <tbody id="password-table"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Add Password Page -->
+    <section id="pageAdd" class="hidden">
+      <h2 class="text-xl font-semibold mt-8 mb-2">Add a Password</h2>
+      <form id="password-form" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label for="website" class="block mb-1 font-medium">Website</label>
+          <input type="text" id="website" class="w-full p-2 border rounded" required />
+        </div>
+        <div>
+          <label for="username" class="block mb-1 font-medium">Username</label>
+          <input type="text" id="username" class="w-full p-2 border rounded" required />
+        </div>
+        <div>
+          <label for="password" class="block mb-1 font-medium">Password</label>
+          <div class="flex gap-2">
+            <input type="password" id="password" class="w-full p-2 border rounded" required />
+            <button type="button" id="genPass" class="bg-gray-700 text-white px-2 rounded">Generate</button>
+          </div>
+          <div id="strength" class="text-xs mt-1"></div>
+        </div>
+        <div class="col-span-full">
+          <button type="submit" class="bg-black text-white font-bold py-2 px-6 rounded hover:bg-gray-800">
+            Submit
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- About Page -->
+    <section id="pageAbout" class="hidden">
+      <h2 class="text-2xl font-bold mb-2">About PassX</h2>
+      <p class="text-sm mb-4 text-gray-600 dark:text-gray-300">
+        PassX is your personal password manager. Store your credentials securely in your browser using local storage.
+        This project is lightweight, fast, and private. All data stays on your device.
+      </p>
+      <ul class="list-disc pl-5 mb-4 text-sm text-gray-600 dark:text-gray-300">
+        <li>Dark mode support</li>
+        <li>Password strength indicator</li>
+        <li>Copy to clipboard functionality</li>
+        <li>Local storage (no cloud dependency)</li>
+        <li>Search, edit, export/import, and more!</li>
+      </ul>
+    </section>
+
+    <!-- Contact Page -->
+    <section id="pageContact" class="hidden">
+      <h2 class="text-2xl font-bold mb-2">Contact</h2>
+      <p class="text-sm mb-4 text-gray-600 dark:text-gray-300">
+        For feedback or support, email: <a href="mailto:support@passx.com" class="text-blue-500 underline">support@passx.com</a>
+      </p>
+    </section>
+  </main>
+
+  <!-- Edit Modal -->
+  <div id="editModal" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 hidden">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded shadow-lg w-80">
+      <h3 class="text-lg font-bold mb-2">Edit Password</h3>
+      <form id="editForm" class="flex flex-col gap-2">
+        <input type="hidden" id="editIdx" />
+        <label>Website
+          <input type="text" id="editWebsite" class="w-full p-2 border rounded" required />
+        </label>
+        <label>Username
+          <input type="text" id="editUsername" class="w-full p-2 border rounded" required />
+        </label>
+        <label>Password
+          <div class="flex gap-2">
+            <input type="password" id="editPassword" class="w-full p-2 border rounded" required />
+            <button type="button" id="editShowPass" class="bg-gray-700 text-white px-2 rounded" title="Show/Hide">👁️</button>
+          </div>
+        </label>
+        <div id="editStrength" class="text-xs mt-1"></div>
+        <div class="flex gap-2 mt-2">
+          <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded">Save</button>
+          <button type="button" id="editCancel" class="bg-gray-400 text-white px-3 py-1 rounded">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="scripts/script.js"></script>
+</body>
+</html>
