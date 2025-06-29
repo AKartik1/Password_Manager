@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PassX - Your Personal Password Manager</title>
+  <title>Password Manager - Your Personal Password Manager</title>
   <link rel="stylesheet" href="assets/style.css" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -14,21 +14,22 @@
   </script>
 </head>
 
-<body class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100">
+<body class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100 min-h-screen transition-colors">
   <nav class="bg-black text-white py-4 px-6 flex justify-between items-center shadow-md">
-    <div class="text-2xl font-extrabold cursor-pointer">PassX</div>
+    <div class="text-2xl font-extrabold cursor-pointer">Password Manager</div>
     <ul class="flex gap-6">
       <li id="navHome" class="hover:text-gray-300 cursor-pointer">Home</li>
       <li id="navAdd" class="hover:text-gray-300 cursor-pointer">Add Password</li>
       <li id="navAbout" class="hover:text-gray-300 cursor-pointer">About</li>
       <li id="navContact" class="hover:text-gray-300 cursor-pointer">Contact</li>
+      <li id="navFAQ" class="hover:text-gray-300 cursor-pointer">FAQ</li>
       <li>
-        <button id="toggleDark" class="bg-gray-700 px-3 py-1 rounded text-sm">Toggle Dark Mode</button>
+        <button id="toggleDark" type="button" class="bg-gray-700 px-3 py-1 rounded text-sm">Toggle Dark Mode</button>
       </li>
     </ul>
   </nav>
 
-  <main class="max-w-4xl mx-auto mt-10 p-4 bg-white rounded-xl shadow-lg dark:bg-gray-800">
+  <main class="max-w-4xl mx-auto mt-10 p-4 bg-white rounded-xl shadow-lg dark:bg-gray-900 transition-colors">
     <!-- Toast Notification -->
     <div id="toast" class="fixed top-5 right-5 z-50 hidden bg-green-600 text-white px-4 py-2 rounded shadow"></div>
 
@@ -58,6 +59,11 @@
           </thead>
           <tbody id="password-table"></tbody>
         </table>
+        <!-- Empty state illustration/message -->
+        <div id="emptyState" class="hidden">
+          <img src="assets/copy.png" alt="No data" />
+          <div>No passwords saved yet.<br>Add your first password!</div>
+        </div>
       </div>
     </section>
 
@@ -75,11 +81,17 @@
         </div>
         <div>
           <label for="password" class="block mb-1 font-medium">Password</label>
-          <div class="flex gap-2">
-            <input type="password" id="password" class="w-full p-2 border rounded" required />
-            <button type="button" id="genPass" class="bg-gray-700 text-white px-2 rounded">Generate</button>
+          <div class="relative flex items-center">
+            <input type="password" id="password" class="w-full p-2 border rounded pr-10" required style="padding-right:2.5rem;" />
+            <button type="button" id="genPass" class="ml-2 bg-gray-700 text-white px-2 rounded">Generate</button>
           </div>
-          <div id="strength" class="text-xs mt-1"></div>
+          <div class="flex items-center mt-1">
+            <div id="strength" class="text-xs"></div>
+            <span id="showPass" class="ml-2 cursor-pointer select-none text-xl bg-white dark:bg-gray-800 px-1 rounded" style="z-index:2;">
+              👁️
+            </span>
+          </div>
+          <div id="strengthBar" class="w-full"></div>
         </div>
         <div class="col-span-full">
           <button type="submit" class="bg-black text-white font-bold py-2 px-6 rounded hover:bg-gray-800">
@@ -91,9 +103,9 @@
 
     <!-- About Page -->
     <section id="pageAbout" class="hidden">
-      <h2 class="text-2xl font-bold mb-2">About PassX</h2>
+      <h2 class="text-2xl font-bold mb-2">About Password Manager</h2>
       <p class="text-sm mb-4 text-gray-600 dark:text-gray-300">
-        PassX is your personal password manager. Store your credentials securely in your browser using local storage.
+        Password Manager is your personal password manager. Store your credentials securely in your browser using local storage.
         This project is lightweight, fast, and private. All data stays on your device.
       </p>
       <ul class="list-disc pl-5 mb-4 text-sm text-gray-600 dark:text-gray-300">
@@ -109,8 +121,22 @@
     <section id="pageContact" class="hidden">
       <h2 class="text-2xl font-bold mb-2">Contact</h2>
       <p class="text-sm mb-4 text-gray-600 dark:text-gray-300">
-        For feedback or support, email: <a href="mailto:support@passx.com" class="text-blue-500 underline">support@passx.com</a>
+        For feedback or support, email: <a href="mailto:kartikashtagi2811@gmail.com" class="text-blue-500 underline">kartikashtagi2811@gmail.com</a>
       </p>
+    </section>
+
+    <!-- FAQ Page -->
+    <section id="pageFAQ" class="hidden">
+      <h2 class="text-2xl font-bold mb-2">Frequently Asked Questions</h2>
+      <ul class="list-disc pl-5 mb-4 text-sm text-gray-600 dark:text-gray-300">
+        <li><b>Where are my passwords stored?</b> In your browser's local storage only.</li>
+        <li><b>Can I recover deleted passwords?</b> No, deleted passwords are permanently removed.</li>
+        <li><b>Is my data sent to any server?</b> No, all data stays on your device.</li>
+        <li><b>How do I use the password generator?</b> Click the 'Generate' button in the Add Password form to create a strong password automatically.</li>
+        <li><b>How do I copy a password?</b> Click the copy icon next to any password in the list to copy it to your clipboard.</li>
+        <li><b>How do I enable dark mode?</b> Click the 'Toggle Dark Mode' button in the navigation bar.</li>
+        <li><b>How do I export/import passwords?</b> Use the Export and Import buttons on the Home page to backup or restore your passwords.</li>
+      </ul>
     </section>
   </main>
 
@@ -133,6 +159,7 @@
           </div>
         </label>
         <div id="editStrength" class="text-xs mt-1"></div>
+        <div id="editStrengthBar" class="w-full"></div>
         <div class="flex gap-2 mt-2">
           <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded">Save</button>
           <button type="button" id="editCancel" class="bg-gray-400 text-white px-3 py-1 rounded">Cancel</button>
@@ -143,4 +170,5 @@
 
   <script src="scripts/script.js"></script>
 </body>
+
 </html>
